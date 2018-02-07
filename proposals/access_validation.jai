@@ -58,9 +58,14 @@ Every time something tagged with #check_ident is used, the associated validator 
 Every time something tagged with #check_decl is used in a declaration, the statements in which
 the resulting identifier is used in will run the validator.
 
-<validator> takes as arguments a `Code_Declaration` and a `Code_Statement` which
+A validator takes as arguments a `Code_Declaration` and a `Code_Statement` which
 can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
 with a specific kind of declaration, like @notes on the declaration.
+
+A validator returns a boolean variable that tells the compiler to stop if it's false, or continue.
+Validators and boolean variables known at compile time can be combined using logical expressions,
+which will be turned into a bool-returning lambda under the hood.
+
 In the current example, `Code_Declaration` must have info about the scope and function it is in.
 
 
