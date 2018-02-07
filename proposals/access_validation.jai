@@ -105,17 +105,27 @@ and I'll be happy to read it.
 
 EXAMPLES
 ```
+Foo :: true;
+Bar :: false;
+
+check_bar :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
+	return true;
+}
+
 Foozle :: struct {
 	bar : int;
 }
+#check_ident Foozle.bar check_foozle_bar :: check_bar
 
 Barzle :: struct {
 	qux : float;
 }
+#check_ident Barzle.qux check_barzle_qux :: (Foo && Bar) || (check_foozle_bar)
 
 Baz :: struct {
 	foo : uint;
 }
+#check_decl Baz check_decl_baz :: false
 
 Cov :: struct {
 	Fe :: struct {
@@ -124,36 +134,30 @@ Cov :: struct {
 
 	fe : Fe;
 }
-
-Foo :: true;
-Bar :: false;
-
-check_bar :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
-	return true;
-}
-
-#check_ident Foozle.bar check_foozle_bar :: check_bar
-#check_ident Barzle.qux check_barzle_qux :: (Foo && Bar) || (check_foozle_bar)
-#check_decl Baz check_decl_baz :: false
 #check_decl Cov check_decl_cov :: (decl : Code_Declaration, stmt : Code_Statement) -> bool { return Bar; }
 #check_decl Cov.Fe check_decl_cov_fe :: (decl : Code_Declaration, stmt : Code_Statement) -> bool { return Foo; }
 
 main :: () {
 	baz : Baz;
+
 	// runs `check_decl_baz` and fails
 	baz.foo += 1;
 
 	foozle : Foozle;
+
 	// runs `check_foozle_bar` which runs `check_bar` which succeeds
 	foozle.bar = 4;
 
 	barzle : Barzle;
+
 	// runs `check_barzle_qux` which runs `check_foozle_bar` which succeeds
 	barzle.qux = 2;
 
 	cov : Cov;
-	// disables `check_decl_cov` for this statement, because it would fail
+
+	// disables `check_decl_cov` for the next statement, because it would fail
 	#override_check check_decl_cov
+
 	// runs `check_decl_cov_fe` and succeeds
 	cov.fe.fe = 1.23;
 }
