@@ -13,8 +13,9 @@ RATIONALE
 
 Restricting data access and usage patterns allows us to remove errors caused by
 not knowing how a certain API works, like trying to change a variable that
-should only be changed by the owner of the pointer to that variable,
-or only by functions injected into a library namespace by the user.
+should only be changed in certain ways or certain places, like places where
+the owner of the pointer to that variable is defined, or only by
+functions injected into a library namespace by the user.
 
 It also allows us to disable valid but error-prone usages that we don't like
 so we can make programming bureaucratic again :^)
