@@ -58,7 +58,9 @@ SYNTAX
 ```
 <identifier> is the target of the check, any scope-visible declared identifier
 <name> is the name that can be referenced in user code, a new public identifier
-<validator> can be a `() -> bool` lambda, a named function, or a logical expression
+<validator> can be a `(decl, stmt) -> bool` lambda, a named function, or
+a logical expression which is turned into a bool-returning lambda and which
+can do logical operations on bool-returning functions.
 
 ```
 #check_decl <identifier> <name> :: <validator>
@@ -90,9 +92,13 @@ In the current example, `Code_Declaration` must have info about the scope and fu
 
 INTERACTIONS
 
-I'm not quite sure how this dovetails with other language features, but since
-the checks are public and identifiers are very simple and the checks use regular functions,
-I don't see how anything could break, but if you find something then please create a GitHub issue
+This uses the same Code_* structures as the compiler message loop that lets us modify code
+on the fly. We'll probably need Code_Check_Ident, Code_Check_Decl and Code_Override_Check structs
+that get sent to the message loop.
+
+I'm not quite sure how this dovetails with other language features, or any performance issues, but
+since the checks are public and use regular functions and identifiers which are simple language features,
+I don't see how anything could break, but if you find something that does then please create a GitHub issue
 and I'll be happy to read it.
 
 
