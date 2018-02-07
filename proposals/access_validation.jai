@@ -13,8 +13,8 @@ RATIONALE
 
 Restricting data access and usage patterns allows us to remove errors caused by
 not knowing how a certain API works, like trying to change a variable that
-should only be changed in certain ways or certain places, like places where
-the owner of the pointer to that variable is defined, or only by
+should only be changed in certain ways or certain places (like places where
+the a pointer to that variable is marked by a special @note) or only by
 functions injected into a library namespace by the user.
 
 It also allows us to disable valid but error-prone usages that we don't like
@@ -87,7 +87,7 @@ the resulting identifier is used in will run the validator.
 
 <validator> takes as arguments a `Code_Declaration` and a `Code_Statement` which
 can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
-with a specific kind of declaration, like ownership or @notes on the declaration.
+with a specific kind of declaration, like @notes on the declaration.
 In the current example, `Code_Declaration` must have info about the scope and function it is in.
 
 
@@ -226,7 +226,7 @@ check_assign :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
 // returns `true` if the statement tries to assign or do a mutating operation on the identifier in `decl`
 check_mutate :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
 
-// returns `true` if the type in the declaration is an owned pointer, like `guy : !* Guy`
+// returns `true` if the type in the declaration is marked by the @owner note
 check_owned :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
 
 // returns `true` if the type in the declaration of the parent identifier of the one used in the statement
@@ -244,7 +244,7 @@ check_parent_struct_owned :: (decl : Code_Declaration, stmt : Code_Statement) ->
 	// breaking in the middle
 	// if ident is `ident` and `stmt` is `get.the.parent.ident = 2;` then the parent is `parent`
 
-	// return whether the type in the declaration `parent` is an owned pointer
+	// return whether the declaration of `parent` contains an @owner note
 }
 
 Guy :: struct {
@@ -264,7 +264,7 @@ Guy :: struct {
 // be the declaration and the declaration will the `Guy :: struct`, which won't work for our functions so far
 #check_decl Guy check_guy_owned_in_main :: !(!check_in_main && check_owned)
 
-// allow changing the `name` member of a variable of type `Guy` only when the variable is declared as an owned pointer
+// allow changing the `name` member of a variable of type `Guy` only when the variable is declared with an @owner note
 // @OutsideStruct
 #check_ident Guy.name check_guy_name :: check_mutate && check_parent_struct_owned
 
@@ -308,7 +308,8 @@ main :: () {
 	}
 
 	// runs `check_guy_owned_in_main` which succeeds
-	guy : !* Guy;
+	@owner
+	guy : *Guy;
 
 	try_to_name_guy_but_fail(guy, "Tom Hanks");
 
@@ -316,7 +317,8 @@ main :: () {
 	// succeeds since the declaration is owned
 	guy.name = "Tom Hanks";
 
-	guy2 : !* Guy;
+	@owner
+	guy2 : *Guy;
 	guy2.name = "Private Ryan";
 
 	move_guy(guy, world);
