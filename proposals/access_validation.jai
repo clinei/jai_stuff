@@ -15,7 +15,8 @@ Restricting data access and usage patterns allows us to remove errors caused by
 not knowing how a certain API works, like trying to change a variable that
 should only be changed in certain ways or certain places (like places where
 the a pointer to that variable is marked by a special @note) or only by
-functions injected into a library namespace by the user.
+functions in a specific namespace, whether injected by the user or part of
+the library itself.
 
 It also allows us to disable valid but error-prone usages that we don't like
 so we can make programming bureaucratic again :^)
