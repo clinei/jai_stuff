@@ -11,56 +11,61 @@ check if this breaks in some edge case or makes programming much less enjoyable.
 
 RATIONALE
 
-Restricting data access and usage patterns allows us to remove errors caused by
-not knowing how a certain API works, like trying to change a variable that
-should only be changed in certain ways or certain places (like places where
-the a pointer to that variable is marked by a special @note) or only by
-functions in a specific namespace, whether injected by the user or part of
-the library itself.
+We want to remove errors caused by not knowing how a certain API works,
+like trying to change a variable that should only be changed in certain ways
+or certain places, otherwise the API breaks.
 
-It also allows us to disable valid but error-prone usages that we don't like
-so we can make programming bureaucratic again :^)
+Restricting data access and usage patterns allows us to do that.
+However, we should not burden serious programmers who know what they're doing.
 
-But fret not, all checks and balances can be disabled if you're in a rush to
-push an important hotfix, optionally with surgical precision.
+An example of a restriction we'd wanna implement is allowing a variable to
+be changed only by functions in a specific namespace, whether injected by
+the user or part of the library code itself, so we have only one place to
+look at when that variable somehow gets a wrong value.
 
-Jokes aside, while the average user wouldn't need this much control,
-library writers could use it to stop user bugs that experts could easily notice
-and avoid but novices would continuously step on, by letting the experts
-sign a short waiver to tinker with the internals, and this specific method
-seems to work way better at stopping new users from getting smashed around
+Restricting usage also allows us to disable valid but error-prone usages
+that we don't like so we can make programming bureaucratic again :^)
+
+For that reason, all restrictions should be possible to be disabled
+if you're in a rush to push an important hotfix, or when the programmer
+knows what they are doing.
+
+Since it must be possible to override all validation from user code,
+all validation rules must be public, and unless we wanna override
+all the checks, we need to be able to refer to those checks by name.
+
+Users of library code might want to add validation to protect their own code
+from stupid mistakes, so we need the ability to add additional checks
+to imported identifiers, outside the declarations of structs and
+outside the modules where things are defined, aka user code.
+
+While the average user wouldn't need this much control, library writers
+could use it to stop user bugs that experts could easily notice and avoid
+but novices could continuously step on, by letting the experts sign a short
+waiver, to be allowed to tinker with the internals, and this specific method
+seems to work better at stopping new users from getting smashed around
 by your API or shooting themselves in the foot, than access modifiers,
 because it allows you to provide custom error messages for highly specific
 usages, perhaps even defining the order in which someone should call functions,
-by storing info about the checked statements in module-level global variables.
-
-A more specific if also esoteric example:
-an API is so complex that in order to use it you have to read tons of docs.
-People who haven't read enough to use the API correctly but are confident
-that they have, will try to call the functions and discover that they fail
-with the message "Read The Fucking Manual!". Taken aback, the user goes and
-reads the manual, getting greeted by a wizard that gives him a broken @note and
-tells him to go find all the other bits scattered across the documentation.
-Only when he has collected all the pieces can he glue them together and
-tag his code with the correct @note and use the API.
-Or he can cheat and just use #override_check. Oh well, his loss.
+by storing info about the validated statements in module-level global variables.
 
 In conclusion:
-All checks must be named, so they can be selectively overridden.
-All checks must refer to an identifier explicitly, so they can be
-tagged onto any type from any place that can use it, like user code
-checking a library type because their purposes require stricter usage.
-All checks must be public so that they can be overridden in client code.
+All validation rules must be named, so that they may be selectively overridden.
+All validation rules must refer to an identifier explicitly, so that
+it could be validated more thoroughly from any place that can use it.
+All validation rules must be public so that they can be overridden in client code.
 
 
 METHOD
 
-Every time something tagged with #check_ident is used, the associated validator is run.
-Every time something tagged with #check_decl is used in a declaration, the statements in which
-the resulting identifier is used in will run the validator.
+We can use new compiler directives #check_ident, #check_decl, and #override_check.
 
-A validator takes as arguments a `Code_Declaration` and a `Code_Statement` which
-can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
+Every time something tagged with #check_ident is used, the associated validation rules are run.
+Every time something tagged with #check_decl is used in a declaration, the statements in which
+the resulting identifier is used in will run the associated validation rules.
+
+A validation rule aka validator takes as arguments a `Code_Declaration` and a `Code_Statement`
+which can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
 with a specific kind of declaration, like @notes on the declaration.
 
 A validator returns a boolean variable that tells the compiler to stop if it's false, or continue.
@@ -70,7 +75,7 @@ which will be turned into a bool-returning lambda under the hood.
 In the current example, `Code_Declaration` must have info about the scope and function it is in.
 
 
-INTERACTIONS
+CONSIDERATIONS
 
 This uses the same Code_* structures as the compiler message loop that lets us modify code
 on the fly. We'll probably need Code_Check_Ident, Code_Check_Decl and Code_Override_Check structs
@@ -82,7 +87,9 @@ I don't see how anything could break, but if you find something that does then p
 and I'll be happy to read it.
 
 
-SYNTAX
+SYNTAX  (not final)
+
+(also see EXAMPLES)
 
 ```
 #check_ident <identifier> <name> :: <validator>
@@ -167,8 +174,18 @@ main :: () {
 	// runs `check_decl_cov_fe` and succeeds
 	cov.fe.fe = 1.23;
 }
-
 ```
+
+A more specific if also esoteric example:
+an API is so complex that in order to use it you have to read tons of docs.
+People who haven't read enough to use the API correctly but are confident
+that they have, will try to call the functions and discover that they fail
+with the message "Read The Fucking Manual!". Taken aback, the user goes and
+reads the manual, getting greeted by a wizard that gives him a broken @note and
+tells him to go find all the other bits scattered across the documentation.
+Only when he has collected all the pieces can he glue them together and
+tag his code with the correct @note and use the API.
+Or he can cheat and just use #override_check. Oh well, his loss.
 
 
 SEE ALSO
