@@ -52,6 +52,30 @@ checking a library type because their purposes require stricter usage.
 All checks must be public so that they can be overridden in client code.
 
 
+METHOD
+
+Every time something tagged with #check_ident is used, the associated validator is run.
+Every time something tagged with #check_decl is used in a declaration, the statements in which
+the resulting identifier is used in will run the validator.
+
+<validator> takes as arguments a `Code_Declaration` and a `Code_Statement` which
+can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
+with a specific kind of declaration, like @notes on the declaration.
+In the current example, `Code_Declaration` must have info about the scope and function it is in.
+
+
+INTERACTIONS
+
+This uses the same Code_* structures as the compiler message loop that lets us modify code
+on the fly. We'll probably need Code_Check_Ident, Code_Check_Decl and Code_Override_Check structs
+that get sent to the message loop.
+
+I'm not quite sure how this dovetails with other language features, or any performance issues, but
+since the checks are public and use regular functions and identifiers which are simple language features,
+I don't see how anything could break, but if you find something that does then please create a GitHub issue
+and I'll be happy to read it.
+
+
 SYNTAX
 
 ```
@@ -77,30 +101,6 @@ For the following statement or block,
 if names are provided, it disables each check that
 matches those defined by #check_ident or #check_decl
 if not, it disables all checks.
-
-
-METHOD
-
-Every time something tagged with #check_ident is used, the associated validator is run.
-Every time something tagged with #check_decl is used in a declaration, the statements in which
-the resulting identifier is used in will run the validator.
-
-<validator> takes as arguments a `Code_Declaration` and a `Code_Statement` which
-can be used to allow or deny the usage of a type or identifier in specific kinds of statements,
-with a specific kind of declaration, like @notes on the declaration.
-In the current example, `Code_Declaration` must have info about the scope and function it is in.
-
-
-INTERACTIONS
-
-This uses the same Code_* structures as the compiler message loop that lets us modify code
-on the fly. We'll probably need Code_Check_Ident, Code_Check_Decl and Code_Override_Check structs
-that get sent to the message loop.
-
-I'm not quite sure how this dovetails with other language features, or any performance issues, but
-since the checks are public and use regular functions and identifiers which are simple language features,
-I don't see how anything could break, but if you find something that does then please create a GitHub issue
-and I'll be happy to read it.
 
 
 EXAMPLES
