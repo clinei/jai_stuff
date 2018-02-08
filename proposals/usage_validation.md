@@ -62,20 +62,20 @@ also see the [examples](#Examples)
 ```
 #check_ident <identifier> <name> :: <validator>
 ```
-<identifier> is the target of the check, any scope-visible declared identifier
-<name> is the name that can be referenced in user code, a new public identifier
-<validator> can be a `(decl, stmt) -> bool` lambda, a named function, or a logical expression which is turned into a bool-returning lambda and which can do logical operations on bool-returning functions.
+`<identifier>` is the target of the check, any scope-visible declared identifier
+
+`<name>` is the name that can be referenced in user code, a new public identifier
+
+`<validator>` can be a `(decl, stmt) -> bool` lambda, a named function, or a logical expression which is turned into a bool-returning lambda and which can do logical operations on bool-returning functions.
 
 ```
 #check_decl <identifier> <name> :: <validator>
 ```
-same as above, except
-<identifier> must be an instantiable type, like struct, enum, enum_flags
+same as above, except `<identifier>` must be an instantiable type, like struct, enum, enum_flags
 
 ```
 #override_check <name> <name> ...
 ```
-input is array of names.
 For the following statement or block, if names are provided, it disables each check that matches those defined by #check_ident or #check_decl if not, it disables all checks.
 
 
