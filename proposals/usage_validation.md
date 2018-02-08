@@ -6,7 +6,7 @@ That said, it will probably make external documentation completely redundant, an
 
 ## Rationale
 
-Most of us have used libraries that have parts which aren't very specific about their behavior or don't have good docs. I know I have. I've also seen bug reports that are caused by confusion about what a function or data structure does and how it should be used. I've also noticed how it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
+Most of us have used libraries that have parts which aren't very specific about their behavior or don't have good docs. I know I have. I've also seen bug reports that are caused by confusion about what a function or data structure does and how it should be used. I've also noticed that if something goes wrong, it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
 
 So I thought, "What about writing code that tells people how to use things correctly when they get it wrong? That way, I could get the relevant part of the doc right when I need it, and not have to spend time searching for something that might not be there."
 That seems to go right in line with the friction-reducing mentality that brought about Jai.
