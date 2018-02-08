@@ -1,6 +1,6 @@
 ## Disclaimer
 
-This is a proposal of a new feature for the Jai programming language, specifically, custom usage validation rules. It was written by a self-taught fan with no industry experience but with a lot of experience trying to use libraries with tons of friction. The code parts are based on the YouTube playlist. The proposed feature would not be very useful for small programs, but it could very be useful for libraries that small programs use, and larger projects. Someone with more experience working on such things should look this over and check for breaking edge cases and too much loss of joy in programming.
+This is a proposal of a new feature for the Jai programming language, specifically, custom usage validation rules. It was written by a self-taught fan with no industry experience but lot of experience trying to use libraries with tons of friction. The code parts are based on the YouTube playlist. The proposed feature would not be very useful for small programs, but it could very be useful for libraries that small programs use, and larger projects. Someone with more experience working on such things should look this over and check for breaking edge cases and too much loss of joy in programming.
 
 That said, along with `@notes on : Declarations;` it will probably make external documentation completely redundant, and programming more enjoyable.
 
