@@ -38,7 +38,7 @@ We can use new compiler directives `#check_ident`, `#check_decl`, and `#override
 
 Every time an identifier tagged with `#check_ident` is used, the associated validation rule is run.
 
-Every time an identifier tagged with `#check_decl` is used in a declaration, the statements in which the resulting identifier is used in will run the associated validation rule.
+Every time an identifier tagged with `#check_decl` is used in a declaration, the statements the resulting identifier is used in will run the associated validation rule.
 
 A validation rule aka validator is a boolean function that takes as arguments a `Code_Declaration` and a `Code_Statement` which can be used to allow or deny the usage of an identifier in specific kinds of statements, with a specific kind of declaration, like one tagged with a specific `@note`.
 
