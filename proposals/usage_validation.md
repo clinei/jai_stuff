@@ -138,16 +138,9 @@ main :: () {
 }
 ```
 
-A more specific if also esoteric example:
-an API is so complex that in order to use it you have to read tons of docs.
-People who haven't read enough to use the API correctly but are confident
-that they have, will try to call the functions and discover that they fail
-with the message "Read The Fucking Manual!". Taken aback, the user goes and
-reads the manual, getting greeted by a wizard that gives him a broken `@note` and
-tells him to go find all the other bits scattered across the documentation.
-Only when he has collected all the pieces can he glue them together and
-tag his code with the correct `@note` and use the API.
-Or he can cheat and just use #override_check. Oh well, his loss.
+A more specific if also esoteric example: an API is so complex that in order to use it you have to read tons of docs. People who haven't read enough to use the API correctly but are confident that they have, will try to call the functions and discover that they fail with the message "Read The Fucking Manual!". Taken aback, the user goes and reads the manual, getting greeted by a wizard that gives him a broken `@note` and tells him to go find all the other bits scattered across the documentation. Only when he has collected all the pieces can he glue them together and tag his code with the correct `@note` and use the API. Or he can cheat and just use #override_check. Oh well, his loss.
+
+Or something more familiar: `#check_ident` can be used on functions to say that they are deprecated, and when they will be deleted, so the checks will be run if the user updates the library and tries to compile, and the library creator can allow or disable usage in that case, which can be overridden by the user.
 
 
 ## See also
