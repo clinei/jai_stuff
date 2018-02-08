@@ -40,9 +40,9 @@ Every time an identifier tagged with `#check_ident` is used, the associated vali
 
 Every time an identifier tagged with `#check_decl` is used in a declaration, the statements in which the resulting identifier is used in will run the associated validation rule.
 
-A validation rule aka validator is a boolean function that takes as arguments a `Code_Declaration` and a `Code_Statement` which can be used to allow or deny the usage of an identifier in specific kinds of statements, with a specific kind of declaration, like one tagged with a `@note`.
+A validation rule aka validator is a boolean function that takes as arguments a `Code_Declaration` and a `Code_Statement` which can be used to allow or deny the usage of an identifier in specific kinds of statements, with a specific kind of declaration, like one tagged with a specific `@note`.
 
-A validator returns a boolean variable that tells the compiler to stop if it's false, or continue. Validators and boolean variables known at compile time can be combined using logical expressions, which will be turned into a bool-returning lambda under the hood.
+Validators and boolean variables known at compile time can be combined using logical expressions, which will be turned into a boolean function under the hood.
 
 In the current example, `Code_Declaration` must have info about the scope it is in and we must be able to walk up to the top-most declaration, to get the function name.
 
