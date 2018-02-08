@@ -24,7 +24,7 @@ Since it must be possible to override all restrictions from user code, all valid
 
 While the average user wouldn't need this much control, library writers could use it to stop user bugs that experts could easily notice and avoid but novices could continuously step on, by letting the experts sign a short waiver, to be allowed to tinker with the internals, and this specific method seems to work better at stopping new users from getting smashed around by your API or shooting themselves in the foot, than access modifiers, because it allows you to provide custom error messages for highly specific usages, perhaps even defining the order in which someone should call functions, by storing info about the validated statements in module-level global variables.
 
-
+ 
 
 In conclusion:
 
