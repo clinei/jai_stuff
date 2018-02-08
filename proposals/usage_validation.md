@@ -1,4 +1,4 @@
-## Disclaimer
+## Introduction
 
 This is a proposal of a new feature for the Jai programming language, specifically, custom usage validation rules. The feature would not be very useful for small programs, but it could be very useful for large projects, and libraries that small programs use. It was written by a self-taught fan with no industry experience but a lot of experience trying to use libraries with tons of friction. Someone with more experience working on such things should look this over and check for breaking edge cases and unacceptable loss of joy in programming.
 
@@ -13,11 +13,9 @@ That seems to go right in line with the friction-reducing mentality that brought
 
 So, we want to remove errors caused by not knowing how a certain API works, like trying to change a variable that should only be changed in certain ways or certain places, otherwise the API breaks. Restricting data access and usage patterns allows us to do that. However, we should not burden serious programmers who know what they're doing.
 
-An example of a restriction we'd wanna implement is allowing a variable to be changed only by functions in a specific module or namespace, either injected by the user or part of the library code itself, so we'd only have one place to look at when that variable somehow gets a wrong value.
+An example of a restriction we'd wanna implement is allowing a variable to be changed only by functions in a specific module or namespace, either injected by the user or part of the library code itself, so we'd only have one place to look at when that variable somehow gets a wrong value. This concept is known as [data hiding](http://stevemcconnell.com/articles/missing-in-action-information-hiding/).
 
-Restricting usage also allows us to disable valid but error-prone usages that we don't like so we can make programming bureaucratic again :^)
-
-However, if you're in a rush to push an important hotfix, or when the programmer knows what they are doing, it must be possible to disable all restrictions with ease.
+Restricting usage also allows us to disable valid but error-prone usages that we don't like so we can make programming bureaucratic again. However, if you're in a rush to push an important hotfix, it must be possible to disable all restrictions with ease. We can implement the restrictions with rules which validate whether a specific usage is considered correct.
 
 Since it must be possible to override all restrictions from user code, all validation rules must be public, and unless we wanna override all the checks, we need to be able to refer to those checks by name. Users of external code might want to add their own validation to protect their own code from stupid mistakes, so we need the ability to add additional checks to imported identifiers, outside the declarations of structs and outside the modules where things were defined.
 
