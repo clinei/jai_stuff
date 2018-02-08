@@ -36,7 +36,7 @@ All validation rules must be public so that they can be overridden in client cod
 
 We can use new compiler directives `#check_ident`, `#check_decl`, and `#override_check`.
 
-Every time an identifier tagged with `#check_ident` is used, the associated validation rule are run.
+Every time an identifier tagged with `#check_ident` is used, the associated validation rule is run.
 
 Every time an identifier tagged with `#check_decl` is used in a declaration, the statements in which the resulting identifier is used in will run the associated validation rule.
 
