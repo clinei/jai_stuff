@@ -24,9 +24,11 @@ Since it must be possible to override all restrictions from user code, all valid
 While the average user wouldn't need this much control, library writers could use it to stop user bugs that experts could easily notice and avoid but novices could continuously step on, by letting the experts sign a short waiver, to be allowed to tinker with the internals, and this specific method seems to work better at stopping new users from getting smashed around by your API or shooting themselves in the foot, than access modifiers, because it allows you to provide custom error messages for highly specific usages, perhaps even defining the order in which someone should call functions, by storing info about the validated statements in module-level global variables.
 
 In conclusion:
+
 All validation rules must be named, so that they may be selectively overridden.
-All validation rules must refer to an identifier explicitly, so that
-it could be validated more thoroughly from any place that can use it.
+
+All validation rules must refer to an identifier explicitly, so that it could be validated more thoroughly from any place that can use it.
+
 All validation rules must be public so that they can be overridden in client code.
 
 
@@ -34,8 +36,9 @@ All validation rules must be public so that they can be overridden in client cod
 
 We can use new compiler directives #check_ident, #check_decl, and #override_check.
 
-Every time something tagged with #check_ident is used, the associated validation rules are run.
-Every time something tagged with #check_decl is used in a declaration, the statements in which
+Every time an identifier tagged with #check_ident is used, the associated validation rules are run.
+
+Every time an identifier tagged with #check_decl is used in a declaration, the statements in which
 the resulting identifier is used in will run the associated validation rules.
 
 A validation rule aka validator takes as arguments a `Code_Declaration` and a `Code_Statement` which can be used to allow or deny the usage of a type or identifier in specific kinds of statements, with a specific kind of declaration, like one tagged with `@note`.
@@ -261,8 +264,8 @@ Guy :: struct {
 // be the declaration and the declaration will the `Guy :: struct`, which won't work for our functions so far
 #check_decl Guy check_guy_owned_in_main :: !(!check_in_main && check_owned)
 
-// allow changing the `name` member of a variable of type `Guy` only when the variable is declared with an @owner note
-// @OutsideStruct
+// allow changing the `name` member of a variable of type `Guy` only when
+// the variable is declared with an @owner note, like `@owner guy : Guy;`
 #check_ident Guy.name check_guy_name :: check_mutate && check_parent_struct_owned
 
 move_guy :: (using guy : *Guy, using world : World) {
