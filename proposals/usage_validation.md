@@ -1,10 +1,12 @@
 ## Disclaimer
 
-This is a proposal of a new feature for the Jai programming language, specifically, custom usage validation rules. It was written by a self-taught fan with no industry experience but with a lot of experience trying to use frameworks with tons of friction. The code parts are based on the YouTube playlist. The proposed feature would not be very useful for small programs, but it could very be useful for libraries that small programs use, and larger projects. Someone with more experience working on such things should look this over and check for breaking edge cases and considerable loss of joy in programming.
+This is a proposal of a new feature for the Jai programming language, specifically, custom usage validation rules. It was written by a self-taught fan with no industry experience but with a lot of experience trying to use libraries with tons of friction. The code parts are based on the YouTube playlist. The proposed feature would not be very useful for small programs, but it could very be useful for libraries that small programs use, and larger projects. Someone with more experience working on such things should look this over and check for breaking edge cases and too much loss of joy in programming.
+
+That said, it will probably make external documentation completely redundant, and programming that much enjoyable.
 
 ## Rationale
 
-Most of us have used frameworks that have parts which aren't very specific about their behavior or don't have good docs. I know I have. I've also seen bug reports that are caused by confusion about what a function or data structure does and how it should be used. I've also noticed how it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
+Most of us have used libraries that have parts which aren't very specific about their behavior or don't have good docs. I know I have. I've also seen bug reports that are caused by confusion about what a function or data structure does and how it should be used. I've also noticed how it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
 
 So I thought, "What about writing code that tells people how to use things correctly when they get it wrong? That way, I could get the relevant part of the doc right when I need it, and not have to spend time searching for something that might not be there."
 That seems to go right in line with the friction-reducing mentality that brought about Jai.
