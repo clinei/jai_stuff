@@ -216,8 +216,19 @@ World :: struct {
 	}
 }
 
+// reminds users of `World` that it is not their plaything, every declaration of it is sent as `stmt`
+#check_ident World check_great_responsibility_with_great_power :: (decl : Code_Declaration, stmt : Code_Statement) {
+	
+	printf("This is just a warning");
+
+	printf("With great power comes great responsibility");
+	printf("Take good care of my World, ya hear?");
+
+	return true;
+}
+
 // finds an entity inside an array by name and returns a pointer to it
-search :: (entities : []Entity, name : string) -> *Entity {}
+search :: (world : *World, name : string) -> *Entity {}
 
 vec2 :: struct {
 	x : float;
@@ -325,11 +336,11 @@ save :: (target : *Guy, using savior : *Guy) {
 #check_ident save check_is_deontology_better_than_consequentialism :: false
 
 main :: () {
+
+	// reminds us to take good care of this data structure
 	world : World;
 
 	// checks a single identifier
-	// @SingleVariable
-	// @UserCode
 	#check_ident world check_world :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
 		return true;
 	}
@@ -348,11 +359,12 @@ main :: () {
 	guy2 : *Guy;
 	guy2.name = "Private Ryan";
 
+	// runs `check_world`
 	move_guy(guy, world);
 
 	// this guy is fuckin' nuts!
 	#override_check {
-		private_ryan := cast(*Guy) search(world.entities, "Private Ryan");
+		private_ryan := cast(*Guy) search(&world, "Private Ryan");
 		save(private_ryan, guy);
 	}
 }
