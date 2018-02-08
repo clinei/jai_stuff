@@ -62,7 +62,7 @@ I'm not quite sure how this dovetails with other language features, or any perfo
 ```
 `<identifier>` is the target of the check, any scope-visible declared identifier
 
-`<name>` is the name that can be referenced in user code, a new public identifier
+`<name>` is the name of the check that can be referenced in user code, a new public identifier
 
 `<validator>` can be a `(decl, stmt) -> bool` lambda, a named function, or a logical expression which is turned into a bool-returning lambda and which can do logical operations on bool-returning functions. See [examples](#Examples)
 
