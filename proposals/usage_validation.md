@@ -28,7 +28,7 @@ In conclusion:
 
 All validation rules must be named, so that they may be selectively overridden.
 
-All validation rules must refer to an identifier explicitly, so it could be validated more thoroughly from any place that can use it.
+All validation rules must refer to an identifier explicitly, so it could be validated thoroughly from any place that can use it.
 
 All validation rules must be public so that they can be overridden in client code.
 
