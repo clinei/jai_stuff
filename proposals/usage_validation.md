@@ -144,9 +144,11 @@ Or something more familiar: `#check_ident` can be used on functions to say that 
 
 ## See also
 
-1. https://softwareengineering.stackexchange.com/questions/120019/whats-the-benefit-of-object-oriented-programming-over-procedural-programming/120038#120038 (I don't agree with the guy, but he has some good points)
+1. http://stevemcconnell.com/articles/missing-in-action-information-hiding/
 
-2. The more involved code below
+2. https://softwareengineering.stackexchange.com/questions/120019/whats-the-benefit-of-object-oriented-programming-over-procedural-programming/120038#120038 (I don't agree with the guy, but he has some good points)
+
+3. The more involved code below
 
 ```
 World :: struct {
