@@ -57,8 +57,6 @@ I'm not quite sure how this dovetails with other language features, or any perfo
 
 ## Syntax  (not final)
 
-also see the [examples](#Examples)
-
 ```
 #check_ident <identifier> <name> :: <validator>
 ```
@@ -66,7 +64,7 @@ also see the [examples](#Examples)
 
 `<name>` is the name that can be referenced in user code, a new public identifier
 
-`<validator>` can be a `(decl, stmt) -> bool` lambda, a named function, or a logical expression which is turned into a bool-returning lambda and which can do logical operations on bool-returning functions.
+`<validator>` can be a `(decl, stmt) -> bool` lambda, a named function, or a logical expression which is turned into a bool-returning lambda and which can do logical operations on bool-returning functions. See [examples](#Examples)
 
 ```
 #check_decl <identifier> <name> :: <validator>
