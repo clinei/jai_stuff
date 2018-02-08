@@ -1,6 +1,7 @@
 ## Disclaimer
 
 This is a proposal of a new feature for the Jai programming language, specifically, overridable user-defined usage validation rules. It was written by a self-taught fan with no industry experience but with a lot of experience trying to use frameworks with tons of friction. The code parts are based on the YouTube playlist. The proposed feature would not be very useful for small programs, but it could be useful for the libraries that small projects use, and larger projects. Someone with more experience working on such things should look this over and check if this breaks in some edge case or makes programming much less enjoyable.
+
 Please destroy.
 
 
@@ -22,6 +23,7 @@ However, if you're in a rush to push an important hotfix, or when the programmer
 Since it must be possible to override all restrictions from user code, all validation rules must be public, and unless we wanna override all the checks, we need to be able to refer to those checks by name. Users of library code might want to add validation to protect their own code from stupid mistakes, so we need the ability to add additional checks to imported identifiers, outside the declarations of structs and outside the modules where things were defined, aka user code.
 
 While the average user wouldn't need this much control, library writers could use it to stop user bugs that experts could easily notice and avoid but novices could continuously step on, by letting the experts sign a short waiver, to be allowed to tinker with the internals, and this specific method seems to work better at stopping new users from getting smashed around by your API or shooting themselves in the foot, than access modifiers, because it allows you to provide custom error messages for highly specific usages, perhaps even defining the order in which someone should call functions, by storing info about the validated statements in module-level global variables.
+
 
 
 In conclusion:
