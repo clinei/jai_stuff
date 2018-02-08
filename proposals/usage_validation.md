@@ -17,7 +17,7 @@ An example of a restriction we'd wanna implement is allowing a variable to be ch
 
 Restricting usage also allows us to disable valid but error-prone usages that we don't like so we can make programming bureaucratic again :^)
 
-However, if you're in a rush to push an important hotfix, or when the programmer knows what they are doing, it must be possible to disable all restrictions.
+However, if you're in a rush to push an important hotfix, or when the programmer knows what they are doing, it must be possible to disable all restrictions with ease.
 
 Since it must be possible to override all restrictions from user code, all validation rules must be public, and unless we wanna override all the checks, we need to be able to refer to those checks by name. Users of library code might want to add validation to protect their own code from stupid mistakes, so we need the ability to add additional checks to imported identifiers, outside the declarations of structs and outside the modules where things were defined, aka user code.
 
