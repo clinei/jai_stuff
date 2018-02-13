@@ -8,7 +8,7 @@ That said, along with `@notes on : Declarations;` it can make documentation more
 
 Most of us have used libraries which aren't always specific about their behavior or don't have good docs. I know I have. I've also seen bug reports caused by confusion about what a function or data structure does and how it should be used. I've also noticed that if something goes wrong, it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
 
-So I thought, "What about having the library creator write code that tells people how to use things correctly when they get it wrong? That way, I could get the relevant part of the doc right when I need it, and not have to waste time searching for something that might not be there."
+So I thought, "What about having the library creator write code that tells me how to use things correctly when I get it wrong? That way, I could get the relevant part of the doc right when I need it, and not have to waste time searching for something that might not be there."
 
 That seems to go right in line with the friction-reducing mentality of Jai.
 
