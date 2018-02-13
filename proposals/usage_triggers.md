@@ -143,7 +143,9 @@ This uses the same `Code_*` structures as the compiler message loop that lets us
 
 In the current example, `Code_Declaration` must have info about the scope it is in and we must be able to walk up to the top-most declaration, to get the function name.
 
-I'm not quite sure how this dovetails with other language features, or any performance issues, but since this is a rather simple feature I don't see a way for something to break. But if you do find something that breaks, please create a GitHub issue and I'll be happy to read it and respond.
+I'm not quite sure how this dovetails with other language features, or any performance issues, but since this is a rather simple feature I don't see a way for something to break. But if you do find something that breaks, please create a GitHub issue and I'll be happy to read it.
+
+If we could handle more useful cases with a simple addition or modification to the proposal, please create a GitHub issue as well.
 
 
 ## See also
