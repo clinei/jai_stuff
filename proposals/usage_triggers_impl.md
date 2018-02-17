@@ -1,6 +1,6 @@
 Here's an implementation of [usage triggers](usage_triggers.md) using already existing features, namely notes and the compiler message loop.
 
-For this to work, we need to add a `.notes` member to `Code_Statement`, and notes need to be parsed like procedure calls. That would also let us add comments like @Speed("x64") and @Audit(assigned_to = "clinei,josh", priority = 2) to any statement to be used by static analysis tools to send signals and automate development.
+For this to work, we need to add a `.notes` member to `Code_Statement`, and notes need to be parsed like procedure calls. That would also let us add comments like `@Speed("x64")` and `@Audit(assigned_to = "clinei,josh", priority = 2)` to any statement to be used by static analysis tools to send signals and automate development.
 
 We also need to add a `.statement` member to `Code_Declaration`, so we can get `ident.declaration.statement.notes`.
 
