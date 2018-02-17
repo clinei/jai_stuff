@@ -2,11 +2,11 @@
 
 This is a proposal for a new feature for the Jai programming language, usage triggers. The feature would primarily be useful for large programs and libraries. It was written by a self-taught fan with no industry experience but a lot of experience using libraries with tons of friction. Someone with more experience working on large projects should check this for breaking edge cases and unacceptable loss of joy in programming.
 
-That said, along with `@notes on : Declarations;` it can make documentation more integrated and dynamic, and programming more enjoyable.
+That said, if [implemented](usage_triggers_impl.md), it can make documentation more integrated and dynamic, and programming more enjoyable.
 
 ## Rationale
 
-Most of us have used libraries which aren't always specific about their behavior or don't have good docs. I know I have. I've also seen bug reports caused by confusion about what a function or data structure does and how it should be used. I've also noticed that if something goes wrong, it usually takes me a while to get to the part in the doc that tells me what I did wrong and how I should fix it.
+Most of us have used libraries which aren't always specific about their behavior or don't have good docs. I know I have. I've also seen bug reports caused by confusion about what a function or data structure does and how it should be used. I've also noticed that if something goes wrong, it usually takes me a while to find the part in the doc that tells me what I did wrong and how I should fix it.
 
 So I thought, "What about having the library creator write code that tells me how to use things correctly when I get it wrong? That way, I could get the relevant part of the doc right when I need it, and not have to waste time searching for something that might not be there."
 
@@ -20,7 +20,7 @@ Restricting usage also allows us to disable valid but error-prone usages that we
 
 Since it must be possible to disable all restrictions from user code, all triggers must be public, and unless we wanna disable all of them or none, we need to be able to refer to them by name. Users of external code might want to add their own triggers to protect their own code from stupid mistakes, so we need the ability to add triggers to imported identifiers, outside the modules and declarations they were defined in.
 
-While the average user wouldn't need this much control, library writers could use it to stop user bugs that experts would easily notice and avoid but novices would continuously step on, by letting the experts sign a short waiver, to be allowed to tinker with the internals, and this specific method seems to work better at stopping new users from getting smashed around by your API or shooting themselves in the foot, than access modifiers, because it allows you to provide custom error messages for highly specific usages.
+While the average user wouldn't need this much control, library writers could use it to stop user bugs that experts would easily notice and avoid but novices would continuously step on, by letting the experts sign a short waiver, to be allowed to tinker with the internals. This specific method seems to work better than access modifiers at stopping new users from getting smashed around by your API or shooting themselves in the foot, because it allows you to give custom error messages for very specific usages, all of which can be disabled.
 
 ##### Conclusion
 
@@ -33,18 +33,17 @@ All triggers must be public, so they could be disabled in client code.
 
 ## Method
 
-We can use new compiler directives `#trigger_ident`, `#trigger_decl`, and `#disable_trigger`.
+We use new compiler directives `#trigger_ident`, `#trigger_decl`, and `#disable_trigger`.
 
 Every time an identifier referenced in a `#trigger_ident` is used, the associated trigger function gets run.
 
 Every time an identifier referenced in a `#trigger_decl` is used in a declaration, the statements the resulting identifier is used in will run the associated trigger function. More on this later.
 
-A trigger function is a boolean function that takes as arguments a `Code_Declaration` and a `Code_Statement` which can be used to allow or deny the usage of an identifier in specific kinds of statements, with a specific kind of declaration, like one tagged with a specific `@note`. Returning `true` allows usage, returning `false` disallows.
+A trigger function returns bool and takes as arguments a `*Code_Ident`, a `*Code_Node`, and a `*Code_Statement`, which can be used to allow or deny the usage of an identifier in specific kinds of expressions, in specific kinds of statements, and through the `*Code_Ident`, with specific kinds of declarations, like ones tagged with a specific `@note`. Returning `true` means the usage is allowed, returning `false` means it's not. 
 
 `#disable_trigger` lets us -you guessed it- disable a trigger by name.
 
-Trigger functions and boolean variables known at compile time can be combined using logical expressions, which will be turned into a trigger function under the hood.
-@TODO example code?
+Trigger functions and boolean variables known at compile time can be combined using logical expressions, which will be turned into a trigger function returning the same logical combination with the functions turned into procedure calls under the hood.
 
 
 ## Syntax  (not final)
@@ -52,16 +51,18 @@ Trigger functions and boolean variables known at compile time can be combined us
 ```
 #trigger_ident <identifier> <name> :: <function>
 ```
-`<identifier>` is any scope-visible declared identifier. Each time it is used in a statement, `<function>` gets called with the declaration of `<identifier>` and the statement it was used in as arguments.
+`<identifier>` is any scope-visible declared identifier. Each time it is used in a statement, `<function>` gets called with the arguments being the `<identifier>`, the expression the identifier was found in, and the statement it was used in.
 
 `<name>` is what the trigger can be referenced with in user code, a new public identifier. Can be called just like `<function>`.
 
-`<function>` can be a named function, a `(Code_Declaration, Code_Statement) -> bool` lambda, or a logical expression that gets turned into that lambda. See [examples](#Examples).
+`<function>` can be a named function, a `(*Code_Ident, *Code_Node, *Code_Statement) -> bool` lambda, or a logical expression of such lambdas. See [examples](#Examples).
 
 ```
 #trigger_decl <identifier> <name> :: <function>
 ```
-same as above, except `<identifier>` must be an instantiable type, like struct, enum, enum_flags
+Same as above, except `<identifier>` must be an instantiable type, like struct, enum, enum_flags.
+
+`<function>` is run when something declared with type `<identifier>` is used in a statement.
 
 ```
 #disable_trigger <name> <name> ...
@@ -75,57 +76,77 @@ For the following statement or block, if names are provided, it disables the tri
 Foo :: true;
 Bar :: false;
 
-trigger_bar :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
+trigger_bar :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement) -> bool {
+
 	return true;
 }
 
 Foozle :: struct {
+
 	bar : int;
 }
 #trigger_ident Foozle.bar trigger_foozle_bar :: trigger_bar
 
 Barzle :: struct {
+
 	qux : float;
 }
 #trigger_ident Barzle.qux trigger_barzle_qux :: (Foo && Bar) || (trigger_foozle_bar)
 
 Baz :: struct {
+
 	foo : uint;
 }
 #trigger_decl Baz trigger_decl_baz :: false
 
 Cov :: struct {
+
 	Fe :: struct {
+
 		fe : float;
 	}
 
 	fe : Fe;
 }
-#trigger_decl Cov trigger_decl_cov :: (decl : Code_Declaration, stmt : Code_Statement) -> bool { return Bar; }
-#trigger_decl Cov.Fe trigger_decl_cov_fe :: (decl : Code_Declaration, stmt : Code_Statement) -> bool { return Foo; }
+#trigger_decl Cov trigger_decl_cov :: (ident : *Code_Ident, expr *Code_Node, stmt : *Code_Statement)
+                                      //
+                                      -> bool {
+	return Bar;
+}
+#trigger_decl Cov.Fe trigger_decl_cov_fe :: (ident : *Code_Ident, expr *Code_Node, stmt : *Code_Statement)
+                                            //
+                                            -> bool {
+	return Foo;
+}
 
 main :: () {
+
 	baz : Baz;
 
-	// runs `trigger_decl_baz` and fails
+	// runs `trigger_decl_baz` which fails
+	//
 	baz.foo += 1;
 
 	foozle : Foozle;
 
 	// runs `trigger_foozle_bar` which runs `trigger_bar` which succeeds
+	//
 	foozle.bar = 4;
 
 	barzle : Barzle;
 
 	// runs `trigger_barzle_qux` which runs `trigger_foozle_bar` which succeeds
+	//
 	barzle.qux = 2;
 
 	cov : Cov;
 
 	// disables `trigger_decl_cov` for the next statement, because it would fail
+	//
 	#disable_trigger trigger_decl_cov
-
+	//
 	// runs `trigger_decl_cov_fe` and succeeds
+	//
 	cov.fe.fe = 1.23;
 }
 ```
@@ -137,11 +158,11 @@ Or something more familiar: `#trigger_ident` can be used on function identifiers
 
 ## Considerations
 
-Triggers will probably have to be processed before everything else. Or not. Hey, I'm not a compiler engineer.
+Triggers will probably have to be processed before everything else. Or not. Hey, I'm not a compiler engineer. But I did try to [implement this using existing features](usage_triggers_impl.md).
 
-This uses the same `Code_*` structures as the compiler message loop that lets us modify code on the fly. We'll probably need `Code_Trigger_Ident`, `Code_Trigger_Decl` and `Code_Disable_Trigger` structs that get sent to the message loop.
+`Code_Statement` will need a `.notes` member and `Code_Declaration` will need a `.statement` member. Maybe we also want notes on parameter declarations? Probably not.
 
-In the current example, `Code_Declaration` must have info about the scope it is in and we must be able to walk up to the top-most declaration, to get the function name.
+This uses the same `Code_*` structures as the compiler message loop that lets us view code as it's compiled. We'll probably need more structs, like `Code_Trigger_Ident`, `Code_Trigger_Decl` and `Code_Disable_Trigger`.
 
 I'm not quite sure how this dovetails with other language features, or any performance issues, but since this is a rather simple feature I don't see a way for something to break. But if you do find something that breaks, please create a GitHub issue and I'll be happy to read it.
 
@@ -152,42 +173,61 @@ If we could handle more useful cases with a simple addition or modification to t
 
 1. http://stevemcconnell.com/articles/missing-in-action-information-hiding/
 
-2. https://softwareengineering.stackexchange.com/questions/120019/whats-the-benefit-of-object-oriented-programming-over-procedural-programming/120038#120038 (I don't agree with the guy, but he has some good points)
+2. https://softwareengineering.stackexchange.com/questions/120019/whats-the-benefit-of-object-oriented-programming-over-procedural-programming/120038#120038 
+(I don't fully agree with the guy, but he has some good points)
 
-3. The more involved code below
+3. [A possible implementation using existing features](usage_triggers_impl.md)
+
+4. The more involved code below
 
 ```
 World :: struct {
-	entities : []Entity;
+	entities : [] Entity;
 
 	times_guys_moved : uint = 0;
 
-	// use a quick lambda to say that the only operation allowed on this data member is `+= 1`
 	#trigger_ident times_guys_moved
-	trigger_move_guy_world :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
+	//
+	trigger_move_guy_world :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement) -> bool {
 
-		// `decl` is the declaration this trigger is attached to,
-		// in this case `times_guys_moved : uint = 0`
+		// `ident` is the identifier that was in the statement that was triggered
+		// in this case `times_guys_moved`
 
-		// `stmt` is the statement that tries to use the identifier in `decl`,
-		// in this case `times_guys_moved += 1` in function `move_guy`
+		// `expr` is the expression the identifier was found in
+		// in this case `times_guys_moved += 1`
 
-		// return true if right side is literal "1" and operation is "+"
+		// `stmt` is the statement the identifier was found in,
+		// in this case `times_guys_moved += 1;` in procedure `move_guy`
+
+		if the operation is not "+" or the right hand side is not literal "1" {
+
+			printf("Error: The only operation allowed on `World.times_guys_moved` is `+= 1`");
+
+			return true;
+		}
+
+		return false;
 	}
 }
 
 // reminds users of `World` that it is not their plaything, every declaration of it is sent as `stmt`
-#trigger_ident World trigger_great_responsibility_with_great_power :: (decl : Code_Declaration, stmt : Code_Statement) {
+//
+#trigger_ident World trigger_great_responsibility_with_great_power ::
+                     //
+                     (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                     //
+                     -> bool {
 	
 	printf("This is just a warning");
 
 	printf("With great power comes great responsibility");
 	printf("Take good care of my World, ya hear?");
 
-	return true;
+	return false;
 }
 
 // finds an entity inside an array by name and returns a pointer to it
+//
 search :: (world : *World, name : string) -> *Entity {}
 
 vec2 :: struct {
@@ -196,56 +236,84 @@ vec2 :: struct {
 }
 
 Entity :: struct {
+
 	using pos : vec2;
 
 	// disallow mutating the position of any variable of this type outside `move_guy`
+	//
 	#trigger_ident pos.x trigger_pos_x :: !(!trigger_in_move_guy && trigger_mutate)
+	//
 	#trigger_ident pos.y trigger_pos_y :: trigger_pos_x
 
 	// y positions can't be assigned directly, because I said so
+	//
 	#trigger_ident pos.y trigger_pos_y_no_assign :: !trigger_assign
 
 	// note that you can still do `pos = ...`, like the sneak in the constructor of `Guy`,
 	// that could be disabled with
+	//
 	// #trigger_ident pos trigger_pos :: !trigger_assign
 
 	name : string;
 }
 
-// returns `true` if `decl` is in function `main`
-trigger_in_main :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
+// returns `false` when `ident` is in function `main`
+//
+trigger_in_main :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                   //
+                   -> bool {}
 
-// returns `true` if `decl` is in function `move_guy`
-trigger_in_move_guy :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
+// returns `false` when `ident` is in function `move_guy`
+//
+trigger_in_move_guy :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                       //
+                       -> bool {}
 
-// returns `true` when the statement is an assign
-trigger_assign :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
+// returns `false` when the statement is an assign
+//
+trigger_assign :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                  //
+                  -> bool {}
 
-// returns `true` if the statement tries to assign or do a mutating operation on the identifier in `decl`
-trigger_mutate :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
+// returns `false` when the statement is an assign or other mutating operation on `ident`
+//
+trigger_mutate :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                  //
+                  -> bool {}
 
-// returns `true` if the type in the declaration is marked by the @owner note
-trigger_owned :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {}
+// returns `false` if `ident.declaration.statement.notes` includes @owner
+//
+trigger_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                 //
+                 -> bool {}
 
-// returns `true` if the type in the declaration of the parent identifier of the one used in the statement
-// is an owned pointer
-// @ComplexUsage
-trigger_parent_struct_owned :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
-	// get the ident in the declaration
-	ident : Code_Ident = decl.identifier;
+@ComplexUsage
+// returns `false` when the declaration of <parent> in `<parent>.<ident>` has an @owner note
+//
+trigger_parent_struct_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                               //
+                               -> bool {
 
-	// the parent
-	parent : Code_Ident;
+	parent : *Code_Ident;
 
-	// walk down the left side of the statement until the name of the current ident
-	// matches the one in the declaration and then break, setting `parent` at the end of the loop and
-	// breaking in the middle
-	// if ident is `ident` and `stmt` is `get.the.parent.ident = 2;` then the parent is `parent`
+	if expr.kind == DOT_EXPRESSION {
 
-	// return whether the declaration of `parent` contains an @owner note
+		for expr_ident : <idents in dot expression> {
+			parent = expr_ident;
+
+			if expr_ident == ident {
+				break;
+			}
+		}
+
+		return trigger_owned(parent, expr, stmt);
+	}
+
+	return false;
 }
 
 Guy :: struct {
+
 	using base : Entity;
 
 	#constructor (guy : *Guy) {
@@ -257,43 +325,54 @@ Guy :: struct {
 }
 
 // disallow ownership of variables of type `Guy` in functions other than `main`
+//
 // @Speed
 // This can be optimized into a #trigger_ident which checks only the declarations, but then the statement will
 // be the declaration and the declaration will be the `Guy :: struct`, which won't work for our functions so far
-#trigger_decl Guy trigger_guy_owned_in_main :: !(!trigger_in_main && trigger_owned)
+//
+#trigger_decl Guy trigger_guy_owned_in_main :: !( !trigger_in_main && trigger_owned )
 
 // allow changing the `name` member of a variable of type `Guy` only when
 // the variable is declared with an @owner note, like `@owner guy : Guy;`
+/
 #trigger_ident Guy.name trigger_guy_name :: trigger_mutate && trigger_parent_struct_owned
 
 move_guy :: (using guy : *Guy, using world : World) {
+
 	// runs `Entity.trigger_pos_x` which succeeds
+	//
 	x = 4;
 
 	// the guy who wrote `Entity` is dumb!
 	// why would you ever wanna not assign pos.y!?
 	// who cares, I'm just gonna override it
+	//
 	#disable_trigger Entity.trigger_pos_y_no_assign
+	//
 	y = 2;
 
 	// runs `World.trigger_move_guy_world` which succeeds
+	//
 	times_moved_guys += 1;
 }
 
 try_to_name_guy_but_fail :: (guy : *Guy, name : string) {
-	// runs `trigger_guy_name` with the first argument as the declaration and
-	// the assign as the statement, which fails because the statement tries to mutate a 
-	// member variable but the declaration is a non-owned pointer to `Guy`
+
+	// runs `trigger_guy_name` which fails
+	// because the declaration of `guy` doesn't have an @owner note
+	//
 	guy.name = name;
 }
 
 save :: (target : *Guy, using savior : *Guy) {
+
 	target.saved_by = name;
 }
-
 #trigger_ident save trigger_do_we_have_the_men :: false
+//
 #trigger_ident save trigger_are_we_likely_to_succeed :: false
-#trigger_ident save trigger_is_deontology_better_than_consequentialism :: false
+//
+#trigger_ident save trigger_is_consequentialism_better_than_deontology :: false
 
 main :: () {
 
@@ -301,7 +380,10 @@ main :: () {
 	world : World;
 
 	// checks a single local identifier
-	#trigger_ident world trigger_world :: (decl : Code_Declaration, stmt : Code_Statement) -> bool {
+	//
+	#trigger_ident world trigger_world :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+                                          //
+	                                      -> bool {
 		return true;
 	}
 
