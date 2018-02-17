@@ -6,7 +6,7 @@ We also need to add a `.statement` member to `Code_Declaration`, so we can get `
 
 Not implemented yet: triggers on members like `pos.x` or base types included with `using`, because we need to intercept the compiler while it's parsing to build a map.
 
-Compared to the [earlier proposal](usage_triggers.md) using compiler directives, adding triggers to imported idents requires aliasing them and adding the notes to the new declaration, like `@trigger(proc) my_struct :: imported_struct`.
+Compared to the [earlier proposal](usage_triggers.md) using compiler directives, adding triggers to imported idents requires aliasing them and adding the notes to the new declaration, like `@trigger(proc) my_struct :: imported_struct`. We also use structs for passing arguments and returning `null` means the same as returning a `Trigger_Response` with `.allowed = true`.
 
 We can also use this to implement [pluggable type systems](http://bracha.org/pluggableTypesPosition.pdf).
 
@@ -20,16 +20,18 @@ The actual implementation is at the bottom of the file, and mostly in pseudocode
 @trigger(please_be_gentle)
 //
 World :: struct {
+
 	entities : [] Entity;
 
 	@trigger(trigger_guys_moved)
+	//
 	times_guys_moved : uint = 0;
 }
-please_be_gentle :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement) -> *Trigger_Response {
+please_be_gentle :: (data : *Trigger_Data) -> *Trigger_Response {
 
 	response : *Trigger_Response = <get memory somehow>;
 
-	response.text = concat("Take good care of my ", ident.name, ", ya hear?");
+	response.text = concat("Take good care of my ", data.ident.name, ", ya hear?");
 
 	response.text = concat(response.text, "\nThis is just a warning");
 
@@ -37,16 +39,19 @@ please_be_gentle :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statem
 
 	return response;
 }
-trigger_guys_moved :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement) -> *Trigger_Response {
+trigger_guys_moved :: (data : *Trigger_Data) -> *Trigger_Response {
 
-	// `ident` is the identifier that the declaration of which was
+	// `data.ident` is the identifier that the declaration of which was
 	// tagged with a note that points to this procedure
+	//
 	// in this case `times_guys_moved`
 
-	// `expr` is the expression the identifier was found in
+	// `data.expr` is the expression the identifier was found in
+	//
 	// in this case `times_guys_moved += 1`
 
-	// `stmt` is the statement the identifier was found in,
+	// `data.stmt` is the statement the identifier was found in
+	//
 	// in this case `times_guys_moved += 1;` in procedure `move_guy`
 
 
@@ -62,21 +67,28 @@ trigger_guys_moved :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Stat
 }
 
 // finds an entity inside an array by name and returns a pointer to it
-search :: (world : *World, name : string) -> *Entity {}
+//
+search :: (world : *World, name : string)
+          //
+          -> *Entity {}
 
 vec2 :: struct {
+
 	x : float;
 	y : float;
 }
 
 // disallow mutating the x position of any variable of this type outside `move_guy`
+//
 @trigger_member( pos.x, "trigger_pos_x :: !( !trigger_in_move_guy && trigger_mutate )" )
 //
 // same for the y coordinate
 // members of members with `using` can be referred to directly
+//
 @trigger_member( y, "trigger_pos_y :: trigger_pos_x" )
 //
 // y positions can't be assigned directly, because I said so
+//
 @trigger_member( pos.y, "trigger_pos_y_no_assign :: !trigger_assign")
 //
 // note that you can still do `pos = ...`, like the sneak in the constructor of `Guy`,
@@ -84,6 +96,7 @@ vec2 :: struct {
 // @trigger_member( pos, "trigger_pos :: !trigger_assign" )
 //
 Entity :: struct {
+
 	using pos : vec2;
 
 	name : string;
@@ -91,43 +104,50 @@ Entity :: struct {
 
 // allows when if `ident` is in function `main`
 //
-trigger_in_main :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_in_main :: (data : *Trigger_Data)
                    //
                    -> *Trigger_Response {}
 
 // allows when `ident` is in function `move_guy`
 //
-trigger_in_move_guy :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_in_move_guy :: (data : *Trigger_Data)
                        //
                        -> *Trigger_Response {}
 
 // allows when the left side of the statement is an assign
 //
-trigger_assign :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_assign :: (data : *Trigger_Data)
                   //
                   -> *Trigger_Response {}
 
 // allows when the statement assigns or does a mutating operation on `ident`
 //
-trigger_mutate :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_mutate :: (data : *Trigger_Data)
                   //
                   -> *Trigger_Response {}
 
 // allows when `ident.declaration.statement` is marked with an @owner note
 //
-trigger_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_owned :: (data : *Trigger_Data)
                  //
                  -> *Trigger_Response {}
 
 @ComplexUsage
+//
 // allows when the declaration of <parent> in `<parent>.<ident>` has an @owner note
 //
-trigger_parent_struct_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_parent_struct_owned :: (data : *Trigger_Data)
                                //
                                -> *Trigger_Response {
 	parent : *Code_Ident;
 
-	if expr.kind == DOT_EXPRESSION {
+	// we wouldn't need to copy if we used *Code_Ident, *Code_Node, *Code_Statement as arguments
+	//
+	data_copy : *Trigger_Data;
+
+	memcpy( data_copy, data, sizeof(Trigger_Data) );
+
+	if data.expr.kind == DOT_EXPRESSION {
 
 		for expr_ident : <idents in dot expression> {
 			parent = expr_ident;
@@ -137,7 +157,9 @@ trigger_parent_struct_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *
 			}
 		}
 
-		return trigger_owned(parent, expr, stmt);
+		data_copy.ident = parent;
+
+		return trigger_owned(data_copy);
 	}
 
 	return null;
@@ -165,20 +187,22 @@ Guy :: struct {
 }
 //
 @ComplexUsage
+//
 // adapts existing procedures that work on statements to work on declarations
 //
-trigger_guy_owned_in_main :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+trigger_guy_owned_in_main :: (data : *Trigger_Data)
                              -> *Trigger_Response {
 
 	@Audit("is this the ident expression?", assigned_to = "abnercoimbre")
 	//
-	ident = cast(*Code_Ident) stmt.expressions[0];
+	ident := cast(*Code_Ident) data.stmt.expressions[0];
 
-	expr = stmt.base;
+	expr := data.stmt.base;
 
-	main = trigger_in_main(ident, expr, stmt);
+	main :: trigger_in_main(ident, expr, stmt);
 
-	owned = trigger_owned(ident, expr, stmt);
+	owned :: trigger_owned(ident, expr, stmt);
+
 
 	response : *Trigger_Response = <get memory somehow>;
 
@@ -192,6 +216,7 @@ trigger_guy_owned_in_main :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Co
 move_guy :: (using guy : *Guy, using world : World) {
 
 	// runs `trigger_pos_x` which succeeds
+	//
 	x = 4;
 
 	// the guy who wrote the trigger on `Entity` is dumb!
@@ -229,7 +254,7 @@ save :: (target : *Guy, using savior : *Guy) {
 
 main :: () {
 
-	trigger_world :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+	trigger_world :: (data : *Trigger_Data)
                      //
 	                 -> *Trigger_Response {
 
@@ -304,6 +329,8 @@ trigger_decl_user :: (decl : *Code_Declaration) {
 
 	decl = trigger_decl_library(decl);
 
+	data : Trigger_Data;
+
 	if the declaration is for a procedure {
 
 		for every statement in the procedure {
@@ -312,7 +339,11 @@ trigger_decl_user :: (decl : *Code_Declaration) {
 
 				for every identifier in the expression {
 
-					responses :: trigger_stmt_library(ident, expr, stmt);
+					data.ident = identifier;
+					data.expr = expression;
+					data.stmt = statement;
+
+					responses :: trigger_stmt_library(data);
 
 					halt = false;
 
@@ -336,6 +367,15 @@ trigger_decl_user :: (decl : *Code_Declaration) {
 			}
 		}
 	}
+}
+
+Trigger_Data :: struct {
+
+	ident : *Code_Ident;
+
+	expr : *Code_Node;
+
+	stmt : *Code_Statement;
 }
 
 // this could be a base class
@@ -394,6 +434,7 @@ has :: (using map : *Map, key : Key_Type, value : Value_Type) {
 // we don't actually need a remove procedure
 
 // the following are all one to many maps
+//
 trigger_map      : Map(*Code_Ident, [] *Code_Ident);
 trigger_decl_map : Map(*Code_Ident, [] *Code_Ident);
 
@@ -401,6 +442,7 @@ disabled_block_map : Map(*Code_Statement, [] *Code_Ident);
 disabled_decl_map  : Map(*Code_Statement, [] *Code_Ident);
 
 // this procedure uses only the notes, so it could be called after parsing
+//
 trigger_decl_library :: (decl : *Code_Declaration) {
 
 	for decl.notes {
@@ -456,8 +498,7 @@ trigger_decl_library :: (decl : *Code_Declaration) {
 			}
 
 
-			if the <right hand side> is a 
-			boolean expression of `(ident, expr, stmt)` procedures or immutable booleans {
+			if the <right hand side> is a boolean expression of trigger procedures or const booleans {
 
 				make a procedure
 				add a single return statement
@@ -470,7 +511,8 @@ trigger_decl_library :: (decl : *Code_Declaration) {
 				// the string "!proc1 && proc2 & bar ^ false"
 				// becomes :Expanded
 				/* 
-					__trigger_394 :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
+					__trigger_394 :: (data : *Trigger_Data)
+					                 //
 					                 -> *Trigger_Response {
 
 					 	response : *Trigger_Response = <get memory somehow>;
@@ -499,8 +541,9 @@ trigger_decl_library :: (decl : *Code_Declaration) {
 	return decl;
 }
 
-trigger_stmt_library :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
-                         -> [] *Trigger_Response {
+trigger_stmt_library :: (data : *Trigger_Data)
+                        //
+                        -> [] *Trigger_Response {
 
 	responses : [] *Trigger_Response;
 
@@ -551,7 +594,9 @@ trigger_stmt_library :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_St
 		}
 	}
 
-	is_trigger_disabled :: (ident : *Code_Ident, trigger : *Code_Ident) -> bool {
+	is_trigger_disabled :: (ident : *Code_Ident, trigger : *Code_Ident)
+	                       //
+	                       -> bool {
 
 		// @Speed
 		// which ordering is optimal?
