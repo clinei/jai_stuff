@@ -6,7 +6,7 @@ We also need to add a `.statement` member to `Code_Declaration`, so we can get `
 
 Not implemented yet: triggers on members like `pos.x` or base types included with `using`, because we need to intercept the compiler while it's parsing to build a map.
 
-I don't yet know how member access is represented, that would be helpful. I also don't know if the `*Code_Ident`s are the same for the statements and declarations (the code assumes they are).
+I don't yet know how member access is represented, that would be helpful. I also don't know if the `*Code_Ident`s are the same for the statements and declarations (the code assumes they are). A recent `Compiler.jai` would be very useful.
 
 Compared to the [earlier proposal](usage_triggers.md) using compiler directives, adding triggers to imported idents requires aliasing them and adding the notes to the new declaration, like `@trigger(proc) my_struct :: imported_struct`. We also use structs for passing arguments and returning `null` means the same as returning a `Trigger_Response` with `.allowed = true`.
 
