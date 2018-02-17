@@ -1,6 +1,6 @@
 ## Introduction
 
-This is a proposal for a new feature for the Jai programming language, usage triggers. The feature would primarily be useful for large programs and libraries. It was written by a self-taught fan with no industry experience but a lot of experience using libraries with tons of friction. Someone with more experience working on large projects should check this for breaking edge cases and unacceptable loss of joy in programming.
+This is a proposal for a new feature for the [Jai programming language](https://www.youtube.com/watch?v=UTqZNujQOlA&list=PLmV5I2fxaiCKfxMBrNsU1kgKJXD3PkyxO&index=3), usage triggers. The feature would primarily be useful for large programs and libraries. It was written by a self-taught fan with no industry experience but a lot of experience using libraries with tons of friction. Someone with more experience working on large projects should check this for breaking edge cases and unacceptable loss of joy in programming.
 
 That said, if [implemented](usage_triggers_impl.md), it can make documentation more integrated and dynamic, and programming more enjoyable.
 
