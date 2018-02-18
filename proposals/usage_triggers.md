@@ -14,7 +14,7 @@ That seems to go right in line with the friction-reducing mentality of Jai.
 
 So, we want to remove errors caused by not knowing how a certain API works, like trying to change a variable that should only be changed in certain ways or certain places, otherwise the API breaks. Restricting data access and usage patterns allows us to do that. However, we should not burden serious programmers who know what they're doing.
 
-An example of a restriction we'd wanna implement is allowing a variable to be changed only in one place so we only have that place to look at when the variable somehow gets a wrong value. This concept is known as [data hiding](http://stevemcconnell.com/articles/missing-in-action-information-hiding/).
+An example of a restriction we'd wanna implement is allowing a variable to be changed only in one place so we have only that place to look at when the variable somehow gets a wrong value. This concept is known as [data hiding](http://stevemcconnell.com/articles/missing-in-action-information-hiding/).
 
 Restricting usage also allows us to disable valid but error-prone usages that we don't like so we can make programming bureaucratic again. However, if we're in a rush to push an important hotfix, it must be possible to disable such restrictions with ease. We can implement the restrictions with functions that get triggered when a specific thing is done, to allow or disallow it, which can be disabled by the user.
 
