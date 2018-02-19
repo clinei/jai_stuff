@@ -335,7 +335,7 @@ Guy :: struct {
 // allow changing the `name` member of a variable of type `Guy` only when
 // the variable is declared with an @owner note, like `@owner guy : Guy;`
 /
-#trigger_ident Guy.name trigger_guy_name :: trigger_mutate && trigger_parent_struct_owned
+#trigger_ident Guy.name trigger_guy_name :: (trigger_mutate && trigger_parent_struct_owned) || !trigger_mutate
 
 move_guy :: (using guy : *Guy, using world : World) {
 
