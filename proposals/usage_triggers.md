@@ -257,38 +257,38 @@ Entity :: struct {
 	name : string;
 }
 
-// returns `false` when `ident` is in function `main`
+// returns `true` when `ident` is in function `main`
 //
 trigger_in_main :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                    //
                    -> bool {}
 
-// returns `false` when `ident` is in function `move_guy`
+// returns `true` when `ident` is in function `move_guy`
 //
 trigger_in_move_guy :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                        //
                        -> bool {}
 
-// returns `false` when the statement is an assign
+// returns `true` when the statement is an assign
 //
 trigger_assign :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                   //
                   -> bool {}
 
-// returns `false` when the statement is an assign or other mutating operation on `ident`
+// returns `true` when the statement is an assign or other mutating operation on `ident`
 //
 trigger_mutate :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                   //
                   -> bool {}
 
-// returns `false` if `ident.declaration.statement.notes` includes @owner
+// returns `true` if `ident.declaration.statement.notes` includes @owner
 //
 trigger_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                  //
                  -> bool {}
 
 @ComplexUsage
-// returns `false` when the declaration of <parent> in `<parent>.<ident>` has an @owner note
+// returns `true` when the declaration of <parent> in `<parent>.<ident>` has an @owner note
 //
 trigger_parent_struct_owned :: (ident : *Code_Ident, expr : *Code_Node, stmt : *Code_Statement)
                                //
