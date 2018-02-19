@@ -55,7 +55,7 @@ Trigger functions and boolean variables known at compile time can be combined us
 
 `<name>` is what the trigger can be referenced with in user code, a new public identifier. Can be called just like `<function>`.
 
-`<function>` can be a named function, a `(*Code_Ident, *Code_Node, *Code_Statement) -> bool` lambda, or a logical expression of such lambdas. See [examples](#Examples).
+`<function>` can be a named function, a `(*Code_Ident, *Code_Node, *Code_Statement) -> bool` lambda, or a logical expression of such lambdas. See [examples](#examples).
 
 ```
 #trigger_decl <identifier> <name> :: <function>
